@@ -1,7 +1,6 @@
 package com.revature;
-
-import com.revature.contoller.Controller;
 import com.revature.contoller.TransactionController;
+import com.revature.controller.Controller;
 import io.javalin.Javalin;
 
 public class main {
