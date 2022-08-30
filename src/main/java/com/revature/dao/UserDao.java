@@ -27,17 +27,23 @@ public class UserDao {
             throw new RuntimeException(e);
         }
     }
-    public void addUser(String firstName, String lastname, String email, String password, String phoneNumber, Integer role_id) {
+    public String addUser(User newUser) {
+        byte[] pw = newUser.getPassword().getBytes();
         try (Connection con = ConnectionUtility.createConnection()) {
-            PreparedStatement ps = con.prepareStatement("INSERT INTO users VALUES first_name = ?, last_name = ?, email = ? pass = ?, phone = ?, role_id = ?");
+            PreparedStatement ps = con.prepareStatement("INSERT INTO users (first_name, last_name, email, pass, phone, role_id)" +
+                    " VALUES(?, ?, ?, ?, ?, 1) RETURNING *");
 
-            ps.setString(1, firstName);
-            ps.setString(2, lastname);
-            ps.setString(3, email);
-            ps.setString(4, password);
-            ps.setString(5, phoneNumber);
-            ps.setInt(6, role_id);
+            ps.setString(1, newUser.getFirstName());
+            ps.setString(2, newUser.getLastName());
+            ps.setString(3, newUser.getEmail());
+            ps.setBytes(4, pw);
+            ps.setString(5, newUser.getPhoneNumber());
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                return "User Added";
+            }
 
+return "User Not Added";
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }

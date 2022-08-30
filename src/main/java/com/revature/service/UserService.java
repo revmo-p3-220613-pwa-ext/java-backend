@@ -20,13 +20,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import static junit.framework.Assert.assertTrue;
 
 public class UserService {
     private UserDao userDao;
+    private String firstName;
+    private String lastName;
+    private String email;
 
-    public void addUser(UserDao userDao, String firstName, String lastName, String email, String password, String phoneNumber) {
-        this.userDao = userDao;
-    }
+    private String password;
+    private String phoneNumber;
+    private String userRole;
+    private String regexPattern;
+    private UserService EmailValidation;
 
 
     public UserService(UserDao mockedObject) {
@@ -35,6 +44,82 @@ public class UserService {
 
     public UserService() {
         this.userDao = new UserDao();
+    }
+    public String addUser(Map<String, String> newUser)throws InvalidParameterException {
+       User user = new User();
+       InvalidParameterException exceptions = new InvalidParameterException();
+       if (newUser.get("firstName") == null) {
+           exceptions.addMessage("User must have a First Name");
+
+       }
+       if (newUser.get("lastName") == null) {
+           exceptions.addMessage("User must have a Last Name");
+       }
+//       if (email == null) {
+//           exceptions.addMessage("User must have an email");
+//           throw exceptions;
+//
+//       }
+//       if (phoneNumber == null) {
+//           exceptions.addMessage("User must have a Phone Number");
+//           throw exceptions;
+//       }
+       if (newUser.get("password") == null) {
+           exceptions.addMessage("User must be assigned a Role");
+
+
+
+       }
+//          byte newpassword = isValidPassword(newUser.get("password"));
+
+        if (exceptions.containsMessage()) {
+            throw exceptions;
+        }
+        user.setFirstName(newUser.get("firstName"));
+        user.setLastName(newUser.get("lastName"));
+        user.setEmail(newUser.get("email"));
+        user.setPhoneNumber(newUser.get("phoneNumber"));
+        user.setPassword(newUser.get("password"));
+
+
+        return userDao.addUser(user);
+    }
+//    public byte isValidPassword(String password)
+//    {
+//
+//        // Regex to check valid password.
+//        String regex = "^(?=.*[0-9])"
+//                + "(?=.*[a-z])(?=.*[A-Z])"
+//                + "(?=.*[@#$%^&+=])"
+//                + "(?=\\S+$).{8,20}$";
+//
+//        // Compile the ReGex
+//        Pattern p = Pattern.compile(regex);
+//
+//        // If the password is empty
+//        // return false
+//        if (password == null) {
+//            return false;
+//        }
+//
+//        // Pattern class contains matcher() method
+//        // to find matching between given password
+//        // and regular expression.
+//        Matcher m = p.matcher(password);
+//
+//        // Return if the password
+//        // matched the ReGex
+//        return m.matches();
+//    }
+    public static boolean patternMatches(String email, String regexPattern) {
+        return Pattern.compile(regexPattern)
+                .matcher(email)
+                .matches();
+    }
+    public void testUsingSimpleRegex() {
+        email = "username@domain.com";
+        regexPattern = "^(.+)@(\\S+)$";
+        assertTrue(patternMatches(email, regexPattern));
     }
 
     public boolean getUserEmailByEmail(String email) {

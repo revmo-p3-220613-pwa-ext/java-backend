@@ -5,6 +5,7 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.JSONPObject;
+import com.revature.dao.UserDao;
 import com.revature.exception.InvalidParameterException;
 
 import com.revature.model.User;
@@ -69,6 +70,23 @@ public class UserController implements Controller {
 
         });
         app.post("/registration", ctx -> {
+            ObjectMapper om = new ObjectMapper();
+            Map<String, String> newUser = om.readValue(ctx.body(), Map.class);
+            try {
+            ctx.json(userService.addUser(newUser));
+                ctx.status(201);
+            }
+            catch (InvalidParameterException e) {
+                ctx.result(e.getMessage());
+                ctx.status(400);
+            }
+            User user = ctx.bodyAsClass(User.class);
+
+            HttpServletRequest req = ctx.req;
+            HttpSession session = req.getSession();
+
+
+
 
         });
 
