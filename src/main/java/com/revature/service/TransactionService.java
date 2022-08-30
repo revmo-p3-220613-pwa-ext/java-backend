@@ -82,7 +82,7 @@ public class TransactionService {
             exceptions.addMessage("" + userService.getUserByUserId(t.getRequesterId()).getFirstName() + ", you do not have $" + t.getAmount() / 100.00 + " in account " + t.getSendingId() + ".");
             throw exceptions;
         }
-       
+
         return transactionDao.transferBetweenAccounts(t);
     }
 
@@ -97,7 +97,6 @@ public class TransactionService {
         Account primaryAccount = myAccounts.get(0);
         String sendingId = addedTransaction.get("sendingId");
         String amount = addedTransaction.get("amount");
-        System.out.println(primaryAccount.getAccountId());
         Map<String, String> trx = new HashMap<>();
         trx.put("initiatedBy", sendingEmail);
         trx.put("requesterId", String.valueOf(uId));
@@ -107,7 +106,7 @@ public class TransactionService {
         trx.put("descriptionId", "3");
         trx.put("receivingEmail", email);
         Transaction t = validateTransactionParams(trx);
-        if (accountDao.getBalanceofAccountById(t.getReceivingId()) < t.getAmount()) {
+        if (accountDao.getBalanceofAccountById(t.getSendingId()) < t.getAmount()) {
             exceptions.addMessage("Not enough funds!");
             throw exceptions;
         }
@@ -133,17 +132,14 @@ public class TransactionService {
         trx.put("amount", amount);
         trx.put("descriptionId", "4");
         trx.put("receivingEmail", email);
-        System.out.println(trx);
         Transaction t = validateTransactionParams(trx);
         return transactionDao.storeRequest(t);
     }
 
     public Object handleRequestAmount(Map<String, String> tr) throws InvalidParameterException {
         // this map contains t.id, t.requester_id, t.status_id
-        System.out.println(tr);
         Transaction t = validateTransactionParams(tr);
         InvalidParameterException exceptions = new InvalidParameterException();
-        System.out.println(t);
         if (t.getStatusId() == 1) {
             exceptions.addMessage("To handle the request the status must change from <Pending> to <Approved> or <Denied>");
             throw exceptions;

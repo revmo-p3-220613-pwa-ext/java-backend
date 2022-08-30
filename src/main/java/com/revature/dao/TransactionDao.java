@@ -27,8 +27,7 @@ public class TransactionDao {
                 ps.setInt(2, transaction.getSendingId());
                 ps.setInt(3, transaction.getReceivingId());
                 ps.setLong(4, transaction.getAmount());
-                ps.setInt(5, transaction.getDescriptionId());
-                ps.setString(6, transaction.getReceivingEmail());
+                ps.setString(5, transaction.getReceivingEmail());
                 ps.executeUpdate();
                 //change balance for account moving amount out of
                 ps1.setLong(1, transaction.getAmount());
@@ -112,7 +111,8 @@ public class TransactionDao {
                     "JOIN users u ON t.requester_id = u.id " +
                     "JOIN status_types st ON t.status_id  = st.id " +
                     "JOIN transaction_descriptions td ON t.desc_id  = td.id " +
-                    "WHERE t.sending_id = ? OR t.receiving_id = ?;");
+                    "WHERE t.sending_id = ? OR t.receiving_id = ?" +
+                    "ORDER BY res_time DESC");
 
             ps.setInt(1, aid);
             ps.setInt(2, aid);

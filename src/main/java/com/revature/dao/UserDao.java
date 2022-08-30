@@ -49,16 +49,16 @@ return "User Not Added";
         }
     }
 
-    public void updatePassword(String password, String token) {
+    public boolean updatePassword(String email, String newpassword) {
         try (Connection con = ConnectionUtility.createConnection()) {
 
-            PreparedStatement ps = con.prepareStatement("UPDATE users SET pass = convert_to(?, 'LATIN1') WHERE tokenvalue=convert_to(?, 'LATIN1') RETURNING *");
+            PreparedStatement ps = con.prepareStatement("UPDATE users SET pass = convert_to(?, 'LATIN1') WHERE email=? RETURNING *");
 
-            ps.setString(1, password);
-            ps.setString(2, token);
+            ps.setString(1, newpassword);
+            ps.setString(2, email);
 
             ResultSet rs = ps.executeQuery();
-
+            return rs.next();
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
@@ -296,6 +296,25 @@ return "User Not Added";
         }
     }
 
+    public boolean getTokenStatus(String token) {
+        boolean validity=false;
+        byte[] b = token.getBytes();
+        try (Connection con = ConnectionUtility.createConnection();) {
+            PreparedStatement ps = con.prepareStatement("SELECT ? IN(\n" +
+                    "\tSELECT tokenvalue \n" +
+                    "\t\tFROM users \n" +
+                    "\t\t) as tokens;");
+            ps.setBytes(1, b);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) {
+                validity = rs.getBoolean("tokens");
+            }
+            return validity;
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
+
+    }
 }
 
 

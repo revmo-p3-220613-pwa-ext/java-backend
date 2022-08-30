@@ -1,7 +1,5 @@
 package com.revature.controller;
 
-import com.auth0.jwt.JWT;
-import com.auth0.jwt.interfaces.DecodedJWT;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.util.JSONPObject;
@@ -160,82 +158,53 @@ public class UserController implements Controller {
             }
         });
 
-        app.put("/resetpassword", ctx -> {
-
+        app.get("/uservalues", ctx -> {
             //Try and Catch for error
             try {
-                //retrieve token from inputted parameter
-                String token = ctx.req.getParameter("token");
+                String newTokenValue = ctx.req.getParameter("token");
+                //Create new user with return elements
+                userService.userValues(newTokenValue+'.');
+            } catch (Exception e) {
+                ctx.result(e.getMessage());
+                ctx.status(404);
+            }
 
-                //Decode token to check expiration
-                DecodedJWT jwt = JWT.decode(token);
-                //If valid token not expired validate if correct
-                if (jwt.getExpiresAt().before(new Date())) {
-                    ctx.status(404);
-                    throw new RuntimeException("Reset Link Expired. Please try again");
+        });
+
+        app.put("/resetpassword", ctx -> {
+            //Try and Catch for error
+            try {
+                //get new password from json input
+                JSONObject newPassword = new JSONObject(ctx.body());
+                //Update password in Database and delete token
+                boolean status = userService.resetPassword(newPassword.getString("email"), newPassword.getString("newpassword"));
+                if ( status ){
+                    ctx.result("Reset Password has been successful.");
+                    ctx.status(201);
                 } else {
-                    boolean validateToken = userService.validateToken(token); // we need to write a code to verify the token validity
-                    if (validateToken) {
-                        //get new password from json input
-                        JSONObject newPassword = new JSONObject(ctx.body());
-                        //Update password in Database and delete token
-                        userService.updatePassword(newPassword.getString("newpassword"), token);
-                        userService.deleteToken(token);
-                        // redirect user to setup a new password page
-                    } else {
-                        ctx.status(404);
-                        throw new RuntimeException("OOPS something went wrong. Reset Link Expired");
-                        // return user a message with invalid token
-                    }
+                    ctx.result("Reset Link Expired. Please try again");
+                    ctx.status(401);
                 }
             } catch (Exception e) {
+                ctx.result("Reset Link Expired. Please try again");
                 ctx.status(404);
-                throw new RuntimeException("Reset Link Expired. Please try again");
             }
         });
 
         app.post("/forgotpassword", ctx -> {
-            //String email="";
-            //Create JSONObject with inputted json value
             try {
                 JSONObject inputEmail = new JSONObject(ctx.body());
                 if (inputEmail.getString("email").equals("")) {
                     ctx.result("Please enter the email!");
                     ctx.status(404);
-                    throw new RuntimeException("The email pertaining to the account has been sent an email. Please check email for reset link.");
-                }
-                //Check if email is in the database
-                if (userService.getUserEmailByEmail(inputEmail.getString("email"))) {
-                    //Create new user Object
-                    User currUser = new User();
-
-                    //return user Object based on email found
-                    currUser = userService.getUserByInputEmail(inputEmail.getString("email"));
-
-                    //Create web Token based on values with expiration
-                    String jwtToken = Jwts.builder().claim("last_name", currUser.getLastName()).claim("userId", currUser.getUserId()).claim("email", currUser.getEmail()).setSubject(currUser.getFirstName()).setId(UUID.randomUUID().toString()).setIssuedAt(Date.from(Instant.now())).setExpiration(Date.from(Instant.now().plus(5L, ChronoUnit.MINUTES))).compact();
-
-                    //Send Token to Database
-                    userService.sendToken(jwtToken, currUser.getUserId());
-
-//                    System.out.println(jwtToken);
-
-                    //Create URL and send email with reset URL
-                    String addressUrl =  "http://localhost:5051/resetpassword?token="+jwtToken;
-                    int status = EmailUtility.email(inputEmail.getString("email"), "Reset your RevMo password", addressUrl);
-                    if (status == 202) {
-                        System.out.println("Please Check Your Email!");
-                    } else {
-                        ctx.status(404);
-                        throw new RuntimeException("The email pertaining to the account has been sent an email. Please check email for reset link.");
-                    }
-
                 } else {
                     boolean status = userService.forgetPassword(inputEmail);
                     if ( status ){
+                        ctx.result("The email pertaining to the account has been sent an email. Please check email for reset link.");
                         ctx.status(202);
                     } else {
-                        ctx.status(403);
+                        ctx.result("The email pertaining to the account has been sent an email. Please check email for reset link.");
+                        ctx.status(404);
                     }
                 }
             }catch (Exception e) {
