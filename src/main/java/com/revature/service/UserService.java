@@ -50,31 +50,31 @@ public class UserService {
     public UserService() {
         this.userDao = new UserDao();
     }
-    public String addUser(Map<String, String> newUser)throws InvalidParameterException {
-       User user = new User();
-       InvalidParameterException exceptions = new InvalidParameterException();
-       if (newUser.get("firstName") == null) {
-           exceptions.addMessage("User must have a First Name");
 
-       }
-       if (newUser.get("lastName") == null) {
-           exceptions.addMessage("User must have a Last Name");
-       }
-       if (newUser.get("email") == null) {
-           exceptions.addMessage("User must have an email");
+    public String addUser(Map<String, String> newUser) throws InvalidParameterException {
+        User user = new User();
+        InvalidParameterException exceptions = new InvalidParameterException();
+        if (newUser.get("firstName") == null) {
+            exceptions.addMessage("User must have a First Name");
 
-
-       }
-       if (newUser.get("phoneNumber") == null) {
-           exceptions.addMessage("User must have a Phone Number");
-
-       }
-       if (newUser.get("password") == null) {
-           exceptions.addMessage("User must be assigned a Role");
+        }
+        if (newUser.get("lastName") == null) {
+            exceptions.addMessage("User must have a Last Name");
+        }
+        if (newUser.get("email") == null) {
+            exceptions.addMessage("User must have an email");
 
 
+        }
+        if (newUser.get("phoneNumber") == null) {
+            exceptions.addMessage("User must have a Phone Number");
 
-       }
+        }
+        if (newUser.get("password") == null) {
+            exceptions.addMessage("User must be assigned a Role");
+
+
+        }
 //          byte newpassword = isValidPassword(newUser.get("password"));
 
         if (exceptions.containsMessage()) {
@@ -89,7 +89,8 @@ public class UserService {
 
         return userDao.addUser(user);
     }
-//    public byte isValidPassword(String password)
+
+    //    public byte isValidPassword(String password)
 //    {
 //
 //        // Regex to check valid password.
@@ -121,6 +122,7 @@ public class UserService {
                 .matcher(email)
                 .matches();
     }
+
     public void testUsingSimpleRegex() {
         email = "username@domain.com";
         regexPattern = "^(.+)@(\\S+)$";
@@ -205,11 +207,11 @@ public class UserService {
         return userDao.getReceiverEmailByTransactionId(transactionId);
     }
 
-    public boolean resetPassword(String email, String newpassword){
+    public boolean resetPassword(String email, String newpassword) {
         //Check if email is valid
         boolean isEmail = userDao.getUserEmailByEmail(email);
 
-        if(isEmail) {
+        if (isEmail) {
             //Update password in Database and delete token
             boolean status = userDao.updatePassword(email, newpassword);
 
@@ -221,7 +223,7 @@ public class UserService {
                 throw new RuntimeException("OOPS something went wrong. Reset Link Expired");
                 // return user a message with invalid token
             }
-        }else{
+        } else {
             throw new RuntimeException("OOPS something went wrong. Reset Link Expired");
         }
     }
@@ -240,10 +242,10 @@ public class UserService {
 
                 //Send Token to Database
                 userDao.sendToken(jwtToken, currUser.getUserId());
-                Dotenv dotenv = Dotenv.load();
+//                Dotenv dotenv = Dotenv.load();
                 //Create URL and send email with reset URL
-                String frontendUrl = dotenv.get("FRONTEND_HOST");
-                String addressUrl =  frontendUrl +"/uservalues?token="+jwtToken;
+                String frontendUrl = System.getenv("FRONTEND_HOST");
+                String addressUrl = frontendUrl + "/uservalues?token=" + jwtToken;
 
                 int status = EmailUtility.email(inputEmail.getString("email"), "Reset your RevMo password", addressUrl);
                 if (status == 202) {
@@ -254,7 +256,7 @@ public class UserService {
             } else {
                 throw new RuntimeException("The email pertaining to the account has been sent an email. Please check email for reset link.");
             }
-       } catch (Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("The email pertaining to the account has been sent an email. Please check email for reset link.");
         }
     }
@@ -296,7 +298,7 @@ public class UserService {
                 }
             }
 
-        }catch(Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Reset Link Expired");
         }
     }
