@@ -60,15 +60,15 @@ public class UserService {
        if (newUser.get("lastName") == null) {
            exceptions.addMessage("User must have a Last Name");
        }
-//       if (email == null) {
-//           exceptions.addMessage("User must have an email");
-//           throw exceptions;
-//
-//       }
-//       if (phoneNumber == null) {
-//           exceptions.addMessage("User must have a Phone Number");
-//           throw exceptions;
-//       }
+       if (newUser.get("email") == null) {
+           exceptions.addMessage("User must have an email");
+
+
+       }
+       if (newUser.get("phoneNumber") == null) {
+           exceptions.addMessage("User must have a Phone Number");
+
+       }
        if (newUser.get("password") == null) {
            exceptions.addMessage("User must be assigned a Role");
 
@@ -286,7 +286,7 @@ public class UserService {
                         java.awt.Desktop desktop = java.awt.Desktop.getDesktop();
 
                         if (desktop.isSupported(Desktop.Action.BROWSE)) {
-                            java.net.URI uri = new java.net.URI("http://localhost:5051/resetpassword.html");
+                            java.net.URI uri = new java.net.URI("http://ec2-54-210-81-82.compute-1.amazonaws.com/resetpassword.html");
                             desktop.browse(uri);
                         }
 
