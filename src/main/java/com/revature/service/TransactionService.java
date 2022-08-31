@@ -48,41 +48,40 @@ public class TransactionService {
     }
 
     public Object transferBetweenAccounts(Map<String, String> newTransaction, int uId) throws InvalidParameterException {
-//        Transaction transaction = new Transaction();
+        Transaction transaction = new Transaction();
         InvalidParameterException exceptions = new InvalidParameterException();
-        Transaction t = validateTransactionParams(newTransaction);
-//        Map<String, String> trx = new HashMap<>();
-//        trx.put("requesterId", newTransaction.get("requesterId"));
-//        trx.put("sendingId", newTransaction.get("sendingId"));
-//        trx.put("receivingId", newTransaction.get("receivingId"));
-//        trx.put("amount", newTransaction.get("amount"));
+        Map<String, String> trx = new HashMap<>();
+        trx.put("requesterId", String.valueOf(uId));
+        trx.put("sendingId", newTransaction.get("sendingId"));
+        trx.put("receivingId", newTransaction.get("receivingId"));
+        trx.put("amount", newTransaction.get("amount"));
+        trx.put("receivingEmail", newTransaction.get("receivingEmail"));
+        Transaction t = validateTransactionParams(trx);
 
-//        int requesterId = Integer.parseInt(newTransaction.get("requesterId"));
-//        int sendingId = Integer.parseInt(newTransaction.get("sendingId"));
-//        int receivingId = Integer.parseInt(newTransaction.get("receivingId"));
-//        BigDecimal amt = BigDecimal.valueOf(Double.parseDouble(newTransaction.get("amount"))).movePointRight(2).divideToIntegralValue(BigDecimal.valueOf(1));
-//        long amount = (long) (int) (Float.parseFloat(amt.toString()) * 10) / 10;
-//        String email = newTransaction.get("receivingEmail");
-//        transaction.setSendingId(sendingId);
-//        transaction.setReceivingId(receivingId);
-//        transaction.setAmount(amount);
-//        transaction.setReceivingEmail(email);
-//        transaction.setRequesterId(requesterId);
+        int sendingId = Integer.parseInt(newTransaction.get("sendingId"));
+        int receivingId = Integer.parseInt(newTransaction.get("receivingId"));
+        BigDecimal amt = BigDecimal.valueOf(Double.parseDouble(newTransaction.get("amount"))).movePointRight(2).divideToIntegralValue(BigDecimal.valueOf(1));
+        long amount = (long) (int) (Float.parseFloat(amt.toString()) * 10) / 10;
+        String email = newTransaction.get("receivingEmail");
+        transaction.setSendingId(sendingId);
+        transaction.setReceivingId(receivingId);
+        transaction.setAmount(amount);
+        transaction.setReceivingEmail(email);
+        transaction.setRequesterId(uId);
         if (t.getReceivingId() == t.getSendingId()) {
             exceptions.addMessage("Sending an amount to the same account you are sending from is not allowed.");
             throw exceptions;
         }
 
-        if (!accountDao.isOwnerOfAccount(uId, t.getSendingId())) {
-            exceptions.addMessage("User " + uId + " does not own account " + t.getSendingId() + ".");
-            throw exceptions;
-        }
+//        if (!accountDao.isOwnerOfAccount(uId, t.getSendingId())) {
+//            exceptions.addMessage("User " + uId + " does not own account " + t.getSendingId() + ".");
+//            throw exceptions;
+//        }
 
         if (!(accountDao.getBalanceofAccountById(t.getSendingId()) >= t.getAmount())) {
             exceptions.addMessage("" + userService.getUserByUserId(t.getRequesterId()).getFirstName() + ", you do not have $" + t.getAmount() / 100.00 + " in account " + t.getSendingId() + ".");
             throw exceptions;
         }
-
         return transactionDao.transferBetweenAccounts(t);
     }
 
